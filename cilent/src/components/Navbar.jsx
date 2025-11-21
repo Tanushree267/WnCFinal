@@ -1,0 +1,76 @@
+// src/components/Navbar.jsx
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { assets } from '../assets/assets';
+import { MenuIcon, XIcon } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { user, logout, isAdmin } = useAppContext();
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const navigate = useNavigate();
+
+  return (
+    <div className="fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-16 lg:px-36 py-3">
+      <Link to="/" className="max-md:flex-1">
+        <img src={assets.logos} alt="Logo" className="w-56 h-auto" />
+      </Link>
+
+      <div
+        className={`max-md:absolute max-md:top-0 max-md:left-0 max-md:font-medium max-md:text-lg z-50
+          flex flex-col md:flex-row items-center max-md:justify-center gap-8 md:px-8 py-3 max-md:h-screen md:rounded-full
+          backdrop-blur bg-black/70 md:bg-white/10 md:border border-gray-300/20 overflow-hidden transition-[width] duration-300
+          ${isOpen ? 'max-md:w-full' : 'max-md:w-0'}`}
+      >
+        <XIcon
+          className="md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        />
+
+        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/">Home</Link>
+        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/movies">Movies</Link>
+        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/threater">Threater</Link>
+        {user && <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/favorite">Favorites</Link>}
+        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/About">About</Link>
+      </div>
+
+      <div className="flex items-center gap-8">
+        {!user ? (
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer"
+          >
+            Login
+          </button>
+        ) : (
+          <div className='relative group'>
+            <img src={assets.profiles} alt="profile" className='w-10 cursor-pointer' onClick={() => setShowDropdown((s) => !s)} />
+            <ul className={`${showDropdown ? 'block' : 'hidden'} group-hover:block absolute top-10 right-0 bg-black/50 backdrop-blur-md shadow border border-gray-700 py-2.5 w-48 rounded-md text-sm z-40 text-white`}>
+              <li onClick={() => { setShowDropdown(false); navigate('/my-bookings'); }} className='p-1.5 pl-3 hover:bg-gray-700 cursor-pointer'>
+                My Bookings
+              </li>
+
+              {/* Admin link shown only for admins */}
+              {isAdmin && (
+                <li onClick={() => { setShowDropdown(false); navigate('/admin/add-shows'); }} className='p-1.5 pl-3 hover:bg-gray-700 cursor-pointer'>
+                  Admin
+                </li>
+              )}
+
+              <li onClick={() => { setShowDropdown(false); logout(); }} className='p-1.5 pl-3 hover:bg-gray-700 cursor-pointer'>
+                Logout
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <MenuIcon className="max-md:ml-4 md:hidden w-8 h-8 cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
+    </div>
+  );
+};
+
+export default Navbar;
+
+
