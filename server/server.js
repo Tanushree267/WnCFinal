@@ -11,7 +11,9 @@ import bookingRouter from './routes/bookingRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import movieRoutes from './routes/movieRoutes.js';
+import favoriteRouter from './routes/favoriteRoutes.js';
 import { stripeWebhooks } from './controllers/stripeWebhooks.js';
+import Stripe from 'stripe';
 
 const app = express();
 const port = 3000;
@@ -19,7 +21,13 @@ const port = 3000;
 await connectDB();
 
 //Stripe webhooks route
-app.use('/api/stripe',express.raw({type : 'application/json'}),stripeWebhooks)
+app.post('/api/stripe',express.raw({type : 'application/json'}),stripeWebhooks)
+// // This MUST come before bodyParser.json for that route
+app.post(
+  '/api/booking/webhook',
+  express.raw({ type: 'application/json' }),
+  stripeWebhooks
+)
 
 app.use(express.json());
 app.use(cors());
@@ -30,6 +38,7 @@ app.use('/api/booking', bookingRouter);
 app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/movie', movieRoutes);
+app.use('/api/favorite', favoriteRouter);
 
 /* ---------------------- REGISTER ---------------------- */
 
@@ -94,4 +103,3 @@ app.post('/auth/login', async (req, res) => {
 app.listen(port, () =>
     console.log(`Server listening at http://localhost:${port}`)
 );
-

@@ -36,6 +36,7 @@ export const AppContextProvider = ({ children }) => {
 
   const [shows, setShows] = useState([]);
   const [showsLoading, setShowsLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
 
   const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL ?? "";
 

@@ -85,7 +85,7 @@ const Movies = () => {
         <MovieSearch axios={axios} onResults={handleSearchResults} />
       </div>
 
-      <div className="flex flex-wrap max-sm:justify-center gap-8">
+      <div className="flex flex-wrap max-sm:justify-center gap-6">
         {movies.map((movie) => (
           <MovieCard movie={movie} key={movie._id} />
         ))}

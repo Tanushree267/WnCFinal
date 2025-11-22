@@ -5,6 +5,11 @@ import appStore from './appStore.svg'
 import screenImage from './screenImage.svg'
 import profiles from './profile_icon.png'
 import profile from './profile.png'
+import bangalore from './bangalore.jpg'
+import goa2 from './goa2.jpg'
+import hyd1 from './hyd1.jpg'
+import mumbai1 from './mumbai1.jpg'
+import aboutImage1 from './aboutImage1.jpg'
 
 export const assets = {
     logos,
@@ -13,7 +18,13 @@ export const assets = {
     appStore,
     screenImage,
     profiles,
-    profile
+    profile,
+    bangalore,
+    goa2,
+    mumbai1,
+    hyd1,
+    aboutImage1
+
 }
 
 export const dummyTrailers = [
@@ -322,3 +333,49 @@ export const dummyBookingData = [
         "isPaid": false,
     },
 ]
+
+// simple theater data for cities (3 theatres each)
+export const theaters = [
+  {
+    id: 'mumbai',
+    city: 'Mumbai',
+    image: mumbai1,
+    theaters: [
+      { name: 'PVR Cinemas - Phoenix Mills', address: 'Lower Parel, Phoenix Mills' },
+      { name: 'INOX - Juhu', address: 'Juhu Tara Rd, Juhu' },
+      { name: 'Carnival Cinemas - R-City', address: 'Ghatkopar West' },
+    ],
+  },
+  {
+    id: 'bengaluru',
+    city: 'Bengaluru',
+    image: bangalore,
+    theaters: [
+      { name: 'PVR Orion', address: 'MG Road, Orion Mall' },
+      { name: 'INOX - Garuda', address: 'Shivaji Nagar' },
+      { name: 'IMAX - Whitefield', address: 'ITPL Road, Whitefield' },
+    ],
+  },
+  {
+    id: 'goa',
+    city: 'Goa',
+    image: goa2,
+    theaters: [
+      { name: 'Cinemax - Panaji', address: 'Panaji, Near Church' },
+      { name: 'Gaiety Cinema', address: 'North Goa' },
+      { name: 'PVR - Miramar', address: 'Miramar Beach Area' },
+    ],
+  },
+  {
+    id: 'hyderabad',
+    city: 'Hyderabad',
+    image: hyd1,
+    theaters: [
+      { name: 'PVR - Inorbit', address: 'Madhapur, Inorbit Mall' },
+      { name: 'INOX - Banjara', address: 'Banjara Hills' },
+      { name: 'Prasads IMAX', address: 'Hyderabad, Near KPHB' },
+    ],
+  },
+];
+
+export default assets;

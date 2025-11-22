@@ -8,6 +8,8 @@ const showSchema = new mongoose.Schema(
         bookedSeats : {type: Array , required : true},
         isPaid : {type: Boolean , default : false},
         paymentLink : {type: String},
+        isCancelled: { type: Boolean, default: false },
+
     },{timestamps: true}
 )
 

@@ -4,6 +4,9 @@ import timeFormat from '../lib/timeFormat';
 import { dateFormat } from '../lib/dateFormat';
 import isoTimeFormat from '../lib/isoTimeFormat';
 import { useAppContext } from '../context/AppContext.jsx';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast'
+
 
 const MyBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY
@@ -29,6 +32,23 @@ const MyBookings = () => {
       setIsLoading(false)
   }
 
+  const handleCancel = async (bookingId) => {
+  try {
+    const { data } = await axios.post(`/api/booking/cancel/${bookingId}`)
+    if (data.success) {
+      // Remove this booking from UI
+      setBookings(prev => prev.filter(b => b._id !== bookingId))
+      toast.success('Booking cancelled')
+    } else {
+      toast.error(data.message || 'Unable to cancel booking')
+    }
+  } catch (error) {
+    console.error(error)
+    toast.error(error?.response?.data?.message || 'Something went wrong')
+  }
+}
+
+
   useEffect(() => {
     if(user){
     getMyBookings()
@@ -52,14 +72,31 @@ const MyBookings = () => {
 
           <div className='flex flex-col md:items-end md:text-right justify-between p-4'>
             <div className='flex items-center gap-4'>
-              <p className='text-2xl font-semibold mb-3'>{currency}{item.amount}</p>
-              {!item.isPaid && <button className='bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer '>Pay Now</button>}
-            </div>
-             <div className='text-sm'>
-              <p><span className='text-gray-400'>Total Tickets:</span>{item.bookedSeats.length}</p>
-              <p><span className='text-gray-400'>Seat Number: </span>{item.bookedSeats.join(", ")}</p>
+  <p className='text-2xl font-semibold mb-3'>{currency}{item.amount}</p>
 
-             </div>
+  {/* Pay Now – only for unpaid */}
+  {!item.isPaid && item.paymentLink && (
+    <a
+      href={item.paymentLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className='bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer '
+    >
+      Pay Now
+    </a>
+  )}
+
+  {/* Cancel – only for unpaid, no cancel for paid bookings */}
+  {!item.isPaid && (
+    <button
+      onClick={() => handleCancel(item._id)}
+      className='border border-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer hover:bg-primary/20'
+    >
+      Cancel
+    </button>
+  )}
+</div>
+
 
           </div>
 

@@ -10,9 +10,13 @@ export const getUserBookings = async (req , res)=>
     {
         const { userId } = req.body; // Assuming userId is sent in the request body
 
-        const bookings = await Booking.find({user: userId}).populate({
-            path:"show"
-            }).sort({createdAt : -1})
+        const bookings = await Booking.find({
+  user: userId,
+  isCancelled: false
+})
+  .populate({ path: 'show', populate: { path: 'movie' } })
+  .sort({ createdAt: -1 })
+
 
 
 

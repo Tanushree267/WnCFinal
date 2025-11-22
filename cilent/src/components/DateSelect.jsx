@@ -11,16 +11,28 @@ const DateSelect = ({ id, shows }) => {
   const [dates, setDates] = useState([]);
 
   useEffect(() => {
-    // Next 7 days
-    const today = new Date();
-    const next7 = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      next7.push(d.toISOString().split("T")[0]);
+    // Derive unique dates from admin-created shows only (no times)
+    // Expect each show to have a `showDateTime` field (ISO string or Date)
+    if (!Array.isArray(shows) || shows.length === 0) {
+      setDates([]);
+      setSelectedDate(null);
+      return;
     }
-    setDates(next7);
-  }, []);
+
+    const dateSet = new Set();
+    for (const s of shows) {
+      if (!s || !s.showDateTime) continue;
+      const dt = new Date(s.showDateTime);
+      if (isNaN(dt.getTime())) continue;
+      const isoDate = dt.toISOString().split("T")[0]; // YYYY-MM-DD
+      dateSet.add(isoDate);
+    }
+
+    const sorted = Array.from(dateSet).sort();
+    setDates(sorted);
+    // default to first date if none selected or if previous selection not in new list
+    setSelectedDate((prev) => (sorted.includes(prev) ? prev : sorted[0] ?? null));
+  }, [shows]);
 
   const onBookHandler = () => {
     if (!selectedDate) return toast.error("Please select a date");

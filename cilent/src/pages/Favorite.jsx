@@ -2,34 +2,40 @@
 import React, { useEffect, useState } from "react";
 import MovieCard from "../components/MovieCard";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Favourite = () => {
-  const { axios } = useAppContext();
+  const { axios, user } = useAppContext();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetch = async () => {
+  const fetchFavorites = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { data } = await axios.get("/api/show/all");
+      const { data } = await axios.post("/api/favorite/user", {
+        userId: user.email
+      });
       if (data.success) {
-        // dedupe movies
-        const map = new Map();
-        data.shows.forEach((s) => {
-          if (s.movie && !map.has(s.movie._id)) map.set(s.movie._id, s.movie);
-        });
-        setMovies([...map.values()]);
+        setMovies(data.movies || []);
+      } else {
+        setMovies([]);
       }
     } catch (err) {
       console.error("Failed to fetch favorites:", err);
       setMovies([]);
+      toast.error("Failed to load favorites");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetch();
-  }, []);
+    fetchFavorites();
+  }, [user]);
 
   if (loading) return <div className="p-10 text-center">Loading...</div>;
   if (movies.length === 0)

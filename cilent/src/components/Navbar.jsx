@@ -30,7 +30,7 @@ const Navbar = () => {
 
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/">Home</Link>
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/movies">Movies</Link>
-        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/threater">Threater</Link>
+        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/theaters">Theaters</Link>
         {user && <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/favorite">Favorites</Link>}
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/About">About</Link>
       </div>

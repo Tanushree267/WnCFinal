@@ -13,6 +13,14 @@ const checkSeatsAvailability = async (showId , selectedSeats ) => {
   return true
 }
 
+// Pricing by row (matches frontend)
+const priceByRow = (row) => {
+  if (["A", "B"].includes(row)) return 100
+  if (["C", "D", "E", "F"].includes(row)) return 150
+  // G, H, I, J are VIP
+  return 250
+}
+
 export const createBooking = async (req , res) => {
   try {
     const { userId, showId, selectedSeats } = req.body;
@@ -33,9 +41,12 @@ export const createBooking = async (req , res) => {
     const showData = await Show.findById(showId).populate('movie')
     if (!showData) return res.status(404).json({ success: false, message: 'Show not found' })
 
-    // compute amount (example: show price + seat prices). Here replace with your real price calc
-    const seatRate = 100 // or derive from show/row
-    const amountRupees = (selectedSeats.length * seatRate) + (showData.showPrice || 0)
+    // compute amount based on seat rows
+    const seatPrice = selectedSeats.reduce((sum, seatId) => {
+      const row = seatId.charAt(0)
+      return sum + priceByRow(row)
+    }, 0)
+    const amountRupees = seatPrice + (showData.showPrice || 0)
     const amountPaisa = Math.round(amountRupees * 100)
 
     // Create booking (unpaid)
@@ -76,6 +87,7 @@ export const createBooking = async (req , res) => {
 
     // store payment link/sessionId if you want
     booking.paymentSessionId = session.id
+    booking.paymentLink = session.url
     await booking.save()
 
     res.json({ success: true, url: session.url })
@@ -93,10 +105,39 @@ export const getOccupiedSeats = async (req, res) => {
       return res.json({ success: true, occupiedSeats: [] })
     }
 
-    const occupiedSeats = Object.keys(showData.occupiedSeats || {})
+    const occupiedSeats = Array.from(showData.occupiedSeats.keys())
     res.json({ success: true, occupiedSeats })
   } catch (error) {
     console.log('Error in getOccupiedSeats:', error.message);
     res.status(500).json({ success: false, message: error.message })
   }
 }
+
+export const cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const booking = await Booking.findById(id)
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' })
+    }
+
+    if (booking.isPaid) {
+      return res.status(400).json({
+        success: false,
+        message: 'This booking is already paid and cannot be cancelled.'
+      })
+    }
+
+    // You can either delete or mark as cancelled
+    booking.isCancelled = true
+    await booking.save()
+
+    // (We are not blocking seats until payment, so no seat release required)
+    return res.json({ success: true, message: 'Booking cancelled successfully' })
+  } catch (error) {
+    console.error('cancelBooking error:', error)
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+

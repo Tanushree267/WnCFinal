@@ -13,6 +13,7 @@ import MyBookings from './pages/MyBookings';
 import Favorite from './pages/Favorite';
 import Login from './pages/login';
 import About from './pages/About';
+import Theaters from './pages/Theaters';
 
 
 // admin pages
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/movies/:id/:date" element={<SeatLayout />} />
         <Route path="/about" element={<About />} />
+        <Route path="/theaters" element={<Theaters/>} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/favorite" element={<Favorite />} />
         <Route path="/login" element={<Login />} />

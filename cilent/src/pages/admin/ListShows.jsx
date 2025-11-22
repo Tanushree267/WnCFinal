@@ -1,32 +1,30 @@
-import React, { useEffect, useState } from 'react'
-import { dummyShowsData } from '../../assets/assets';
-import Title from './Title';
-import { dateFormat } from '../../lib/dateFormat';
+// src/components/admin/ListShows.jsx
+import React, { useEffect, useState } from "react";
+import Title from "./Title";
+import { dateFormat } from "../../lib/dateFormat";
+import { useAppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 const ListShows = () => {
-
-  const currency = import.meta.env.VITE_CURRENCY;
+  const { axios } = useAppContext();
+  const currency = import.meta.env.VITE_CURRENCY || "₹";
 
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getAllShows = async () => {
+  const getAllShows = async () => { 
     try {
-      setShows([
-        {
-          movie: dummyShowsData[0],
-          showDateTime: "2025-06-30T02:30:00.000Z", // correct date
-          showPrice: 59, // correct camelCase
-          occupiedSeats: {
-            A1: "user_1",
-            B1: "user_2",
-            C1: "user_3",
-          }
-        }
-      ]);
-      setLoading(false);
+      const { data } = await axios.get("/api/admin/shows");
+      if (data.success) {
+        setShows(data.shows || []);
+      } else {
+        toast.error(data.message || "Failed to fetch shows");
+      }
     } catch (error) {
       console.error(error);
+      toast.error("Error loading shows");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,23 +42,42 @@ const ListShows = () => {
         <table className="w-full border-collapse rounded-md overflow-hidden text-nowrap">
           <thead>
             <tr className="bg-primary/20 text-left text-white">
-              <th className="p-2 font-medium pl-5">Movie Name</th>
+              <th className="p-2 font-medium pl-5">Movie</th>
               <th className="p-2 font-medium">Show Time</th>
               <th className="p-2 font-medium">Total Bookings</th>
               <th className="p-2 font-medium">Earnings</th>
             </tr>
           </thead>
           <tbody className="text-sm font-light">
-            {shows.map((show, index) => {
-              const totalBookings = Object.keys(show.occupiedSeats).length;
-              const earnings = totalBookings * show.showPrice;
+            {shows.length === 0 && (
+              <tr>
+                <td colSpan="4" className="p-4 text-center text-gray-400">
+                  No shows available
+                </td>
+              </tr>
+            )}
+
+            {shows.map((show) => {
+              const totalBookings = show.occupiedSeats
+                ? Object.keys(show.occupiedSeats).length
+                : 0;
+
+              const earnings =
+                totalBookings * (show.showPrice || show.price || 0);
 
               return (
-                <tr key={index} className="border-b border-primary/10 bg-primary/5 even:bg-primary/10">
-                  <td className="p-2 min-w-[180px] pl-5">{show.movie.title}</td>
+                <tr
+                  key={show._id}
+                  className="border-b border-primary/10 bg-primary/5 even:bg-primary/10"
+                >
+                  <td className="p-2 min-w-[120px] pl-5">
+                    {show.movie?.title || "—"}
+                  </td>
                   <td className="p-2">{dateFormat(show.showDateTime)}</td>
                   <td className="p-2">{totalBookings}</td>
-                  <td className="p-2">{currency} {earnings}</td>
+                  <td className="p-2">
+                    {currency} {earnings}
+                  </td>
                 </tr>
               );
             })}
@@ -72,4 +89,3 @@ const ListShows = () => {
 };
 
 export default ListShows;
-

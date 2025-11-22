@@ -5,14 +5,19 @@ import { Heart, PlayCircleIcon, StarIcon } from "lucide-react";
 import timeFormat from "../lib/timeFormat";
 import DateSelect from "../components/DateSelect";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const MovieDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { axios, image_base_url } = useAppContext();
+  const { axios, image_base_url , user } = useAppContext();
 
   const [movie, setMovie] = useState(null);
   const [shows, setShows] = useState([]);
+
+    // FAVORITE state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -26,9 +31,71 @@ const MovieDetails = () => {
     }
   };
 
+    const checkFavoriteStatus = async () => {
+    // If no logged-in user, clear favorite state
+    if (!user?.email) {
+      setIsFavorite(false);
+      setFavLoading(false);
+      return;
+    }
+
+    try {
+      setFavLoading(true);
+      const { data } = await axios.post("/api/favorite/check", {
+        userId: user.email,
+        movieId: id,
+      });
+      if (data && data.success) {
+        setIsFavorite(Boolean(data.isFavorite));
+      } else {
+        setIsFavorite(false);
+      }
+    } catch (err) {
+      console.error("Check favorite error:", err);
+      setIsFavorite(false);
+    } finally {
+      setFavLoading(false);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast.error("Please login to add favorites");
+      return;
+    }
+
+    try {
+      // disable UI while toggling
+      setFavLoading(true);
+      const endpoint = isFavorite ? "/api/favorite/remove" : "/api/favorite/add";
+      const { data } = await axios.post(endpoint, {
+        userId: user.email,
+        movieId: id,
+      });
+
+      if (data && data.success) {
+        setIsFavorite(!isFavorite);
+        toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
+      } else {
+        toast.error(data?.message || "Failed to update favorite");
+      }
+    } catch (err) {
+      console.error("Toggle favorite error:", err);
+      toast.error("Something went wrong");
+    } finally {
+      setFavLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    checkFavoriteStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, id]);
+
 
   if (!movie) return <div className="p-10 text-center">Loading...</div>;
 
@@ -96,7 +163,13 @@ const MovieDetails = () => {
               Buy Tickets
             </a>
 
-            <button className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95">
+            <button
+              onClick={toggleFavorite}
+              disabled={favLoading}
+              className={`p-2.5 rounded-full transition cursor-pointer active:scale-95 ${
+                isFavorite ? "bg-primary" : "bg-gray-700"
+              }`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}>              
               <Heart className="w-5 h-5" />
             </button>
           </div>
