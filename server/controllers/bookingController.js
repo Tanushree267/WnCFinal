@@ -98,18 +98,33 @@ export const createBooking = async (req , res) => {
 }
 export const getOccupiedSeats = async (req, res) => {
   try {
-    const { showId } = req.params;
-    const showData = await Show.findById(showId)
+    const { showId } = req.params
 
-    if (!showData) {
-      return res.json({ success: true, occupiedSeats: [] })
+    const show = await Show.findById(showId)
+    if (!show) {
+      return res.status(404).json({
+        success: false,
+        message: 'Show not found',
+      })
     }
 
-    const occupiedSeats = Array.from(showData.occupiedSeats.keys())
-    res.json({ success: true, occupiedSeats })
+    // occupiedSeats is a Map<String, Boolean>
+    // We want keys where value === true
+    const occupiedSeats = Array.from(show.occupiedSeats || []).map(([seatId, isTaken]) => {
+      if (isTaken) return seatId
+      return null
+    }).filter(Boolean)
+
+    return res.json({
+      success: true,
+      occupiedSeats,
+    })
   } catch (error) {
-    console.log('Error in getOccupiedSeats:', error.message);
-    res.status(500).json({ success: false, message: error.message })
+    console.error('getOccupiedSeats error:', error)
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    })
   }
 }
 

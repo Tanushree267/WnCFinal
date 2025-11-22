@@ -20,6 +20,12 @@ const port = 3000;
 
 await connectDB();
 
+// Simple debug route you can open in browser
+app.get('/api/stripe/test', (req, res) => {
+  console.log('🔥 GET /api/stripe/test HIT');
+  res.send('stripe test ok');
+});
+
 //Stripe webhooks route
 app.post('/api/stripe',express.raw({type : 'application/json'}),stripeWebhooks)
 // // This MUST come before bodyParser.json for that route

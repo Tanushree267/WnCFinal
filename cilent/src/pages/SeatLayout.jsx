@@ -61,52 +61,44 @@ const SeatLayout = () => {
   }
 
   const renderSeats = (row, count = 9) => (
-    <div key={row} className='flex gap-2 mt-2'>
-      <div className='flex flex-wrap items-center justify-center gap-2'>
-        {Array.from({ length: count }).map((_, i) => {
-          const seatId = `${row}${i + 1}` // <-- fixed backticks here
-          const isSelected = selectedSeats.includes(seatId)
-          const isOccupied = occupiedSeats.includes(seatId)
+  <div key={row} className='flex gap-2 mt-2'>
+    <div className='flex flex-wrap items-center justify-center gap-2'>
+      {Array.from({ length: count }).map((_, i) => {
+        const seatId = `${row}${i + 1}`
+        const isSelected = selectedSeats.includes(seatId)
+        const isOccupied = occupiedSeats.includes(seatId)
 
-          return (
-            <button
-              key={seatId}
-              onClick={() => handleSeatClick(seatId)}
-              disabled={isOccupied}
-              className={`
-                h-8 w-8 rounded border border-primary/60 cursor-pointer
-                ${isSelected ? 'bg-primary text-white' : ''}
-                ${
-                  !isSelected && !isOccupied
-                    ? 'bg-transparent'
-                    : ''
-                }
-                ${
-                  isOccupied
-                    ? 'bg-gray-500/60 text-white cursor-not-allowed'
-                    : ''
-                }
-              `}
-            >
-              {seatId}
-            </button>
-          )
-        })}
-      </div>
+        return (
+          <button
+            key={seatId}
+            onClick={() => handleSeatClick(seatId)}
+            disabled={isOccupied}
+            className={`
+              h-8 w-8 rounded border border-primary/60 cursor-pointer
+              ${isSelected ? 'bg-primary text-white' : ''}
+              ${!isSelected && !isOccupied ? 'bg-transparent' : ''}
+              ${isOccupied ? 'bg-gray-500/60 text-white cursor-not-allowed' : ''}
+            `}
+          >
+            {seatId}
+          </button>
+        )
+      })}
     </div>
-  )
+  </div>
+)
 
   const getOccupiedSeats = async (showId) => {
-    if (!showId) return
-    try {
-      const { data } = await axios.get(`/api/booking/seats/${showId}`) // <-- fixed backticks
-      if (data.success) {
-        setOccupiedSeats(data.occupiedSeats)
-      }
-    } catch (error) {
-      toast.error(error.message)
+  if (!showId) return
+  try {
+    const { data } = await axios.get(`/api/booking/seats/${showId}`)
+    if (data.success) {
+      setOccupiedSeats(data.occupiedSeats || [])
     }
+  } catch (error) {
+    toast.error(error.message)
   }
+}
 
   useEffect(() => {
     getShow()
